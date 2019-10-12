@@ -22,6 +22,7 @@ A Snakemake workflow to call germline copy number variants (CNVs).
 - `conda install -c bioconda/label/cf201901 gatk`
 
 NOTE: In order for gatk3.8 to run properly, do the following:
+
 Download archived version of gatk to folder:
 - `https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.8-1-0-gf15c1c3ef`
 
