@@ -6,7 +6,7 @@ A Snakemake workflow to call germline copy number variants (CNVs).
 ## Installation and usage (currently only running on MGI):
 
 1. Clone the repository: 
-- `git clone https://github.com/ding-lab/germline_variant_snakemake.git`
+- `git clone https://github.com/ding-lab/XHMM_germlineCNV.git`
 
 2. Change the priority of conda channels:
 
