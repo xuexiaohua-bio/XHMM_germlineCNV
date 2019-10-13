@@ -30,6 +30,6 @@ Run the following command:
 - `gatk3-register /path/to/GenomeAnalysisTK.jar`
 
 5. Activate environment: 
-- `conda activate snakemake`
+- `conda activate xhmm_germlineCNV`
 
 
