@@ -2,6 +2,16 @@
 
 ## Description:
 A Snakemake workflow to call germline copy number variants (CNVs).
+This workflow uses XHMM for calling germline CNVs, based on the work published by Fromer and Purcell, 2014.
+Please cite their work if using this workflow in your projects.
+
+##### The original software manual can be found here:
+https://atgu.mgh.harvard.edu/xhmm/tutorial.shtml
+
+##### References:
+https://www.nature.com/articles/ng.3638
+
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4065038/
 
 ## How to start a run on local environment and MGI:
 
