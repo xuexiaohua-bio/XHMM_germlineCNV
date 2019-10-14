@@ -1,0 +1,3 @@
+sample	bampath	filename
+MMRF_1016	/gscmnt/gc2545/multiple_myeloma/MMRF/WXS_normal_BAMs/SRR1566813.newheader.sorted.markedDup.bam	SRR1566813.newheader.sorted.markedDup.bam
+MMRF_1020	/gscmnt/gc2545/multiple_myeloma/MMRF/WXS_normal_BAMs/SRR2128933.newheader.sorted.markedDup.bam	SRR2128933.newheader.sorted.markedDup.bam
