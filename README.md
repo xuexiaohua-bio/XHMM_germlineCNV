@@ -24,6 +24,7 @@ https://github.com/yigewu/xhmm_google_cloud
 - Download and install Miniconda 3 with:
 
 `$ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh`
+
 `$ bash Miniconda3-latest-Linux-x86_64.sh`
 
 #### 2. Clone the XHMM_germlineCNV repository: 
