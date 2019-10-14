@@ -13,6 +13,9 @@ https://www.nature.com/articles/ng.3638
 
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4065038/
 
+#### Original workflow written by Yige Wu (only suitable for Google Cloud):
+https://github.com/yigewu/xhmm_google_cloud
+
 ## How to start a run on local environment and MGI:
 
 ### Set-up:
