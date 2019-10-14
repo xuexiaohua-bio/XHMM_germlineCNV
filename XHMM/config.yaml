@@ -1,0 +1,4 @@
+samples: sample.txt
+genomeRef: "/gscmnt/gc2737/ding/Reference/hs37d5_plusRibo_plusOncoViruses_plusERCC.20170530.fa"
+intervalList: "../Files/IntervalFiles/b37/GRCh37.ensGene.coding.exon.interval_list"
+seqdb: "../Files/SEQDB/b37/seqdb.hg19.gz"
