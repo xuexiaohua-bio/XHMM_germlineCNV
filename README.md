@@ -31,7 +31,7 @@ https://github.com/yigewu/xhmm_google_cloud
 - `conda config --add channels hcc`
 
 #### 3. Create a conda environment: 
-- `conda create -n xhmm_germlineCNV python=3.6 snakemake pandas plinkseq`
+- `conda create -n xhmm_germlineCNV python=3.6 snakemake-minimal=5.4.5 pandas plinkseq`
 
 #### 4. Activate environment:
 - `conda activate xhmm_germlineCNV`
