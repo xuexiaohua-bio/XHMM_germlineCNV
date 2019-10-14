@@ -63,7 +63,7 @@ Add the sample ids and path to the sample BAM files you are using.
 
 ### Running XHMM_germlineCNV:
 
-To run the workflow, run:
+To run the workflow, run (remember to modify config.yaml and sample.txt files according to your needs):
 
 - `cd path/to/XHMM_germlineCNV/XHMM`
 - `bash run.sh`
