@@ -82,7 +82,7 @@ Run the following command:
     Note that we have a copy of each of these files for both grch37 and grch38 which are downloaded when git repository is cloned (location: XHMM_germlineCNV/Files)
 
 #### 9. Modify sample.txt according to your needs:
-- sample.txt must be in the format: sample\tbampath\tfilename\n .
+- sample.txt must be in the format: sample\tbampath\n .
 
 Add the sample ids and path to the sample BAM files you are using.
 
