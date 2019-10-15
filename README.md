@@ -16,6 +16,19 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4065038/
 #### Original workflow written by Yige Wu (only suitable for Google Cloud):
 https://github.com/yigewu/xhmm_google_cloud
 
+## External dependency files:
+
+The XHMM workflow requires two dependency files for the analysis: a interval file and a seqdb file.
+
+Interval files have been downloaded from UCSC table browser for both grch37 and grch38 and provided with this repository (see Files/IntervalFiles diretory).
+
+seqdb files are databases for the human genome sequence generated with plinkseq.
+These files are available at MGI for both grch37 and grch38:
+- b37: `/gscmnt/gc3020/dinglab/fernanda/Projects/XHMM_germlineCNV/Files/SEQDB/b37/seqdb.hg19`
+- b38: `/gscmnt/gc3020/dinglab/fernanda/Projects/XHMM_germlineCNV/Files/SEQDB/b38/seqdb.hg38`
+
+Information on how to generate seqdb files are available at the plinkseq webpage (https://atgu.mgh.harvard.edu/plinkseq/resources.shtml) or at MGI at `/gscmnt/gc3020/dinglab/fernanda/Projects/XHMM_germlineCNV/Files/SEQDB/b37/README`.
+
 ## How to start a run on MGI:
 
 ### Set-up:
