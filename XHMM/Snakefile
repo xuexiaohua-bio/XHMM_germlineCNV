@@ -25,11 +25,11 @@ rule step1_depth_of_coverage:
 		intervalList = config["intervalList"]
 	output: "outputs/step1_depth_of_coverage/{sample}.sample_interval_summary"
 	resources:
-		mem = 200000,
+		mem = 30000,
 		threads = 4
-	log: "logs/step1_depth_of_coverage/{sample}.gatk.depthOfCoverage.log"
+	log: "logs/snakemake_logs/step1_depth_of_coverage/{sample}.gatk.depthOfCoverage.log"
 	shell:
-		"gatk3 -T DepthOfCoverage -I {input.bam} -L {input.intervalList} -R {input.genome} -dt BY_SAMPLE -dcov 5000 -l INFO --omitDepthOutputAtEachBase --omitLocusTable --minBaseQuality 0 --minMappingQuality 20 --start 1 --stop 5000 --nBins 200 --includeRefNSites --countType COUNT_FRAGMENTS -o outputs/step1_depth_of_coverage/{sample}"
+		"gatk3 -T DepthOfCoverage -I {input.bam} -L {input.intervalList} -R {input.genome} -dt BY_SAMPLE -dcov 5000 -l INFO --omitDepthOutputAtEachBase --omitLocusTable --minBaseQuality 0 --minMappingQuality 20 --start 1 --stop 5000 --nBins 200 --includeRefNSites --countType COUNT_FRAGMENTS -o outputs/step1_depth_of_coverage/{wildcards.sample}"
 
 ### STEP 2: Get GC content:
 
@@ -41,9 +41,9 @@ rule step2_extreme_gc_content:
 		gcContent = "outputs/step2_extreme_gc_content/DATA.locus_GC.txt",
 		extremeGCtargets = "outputs/step2_extreme_gc_content/extreme_gc_targets.txt"
 	resources:
-		mem = 200000,
+		mem = 30000,
 		threads = 4
-	log: "logs/step2_extreme_gc_content/gatk.gcContent.log"
+	log: "logs/snakemake_logs/step2_extreme_gc_content/gatk.gcContent.log"
 	shell:
 		"""
 		gatk3 -T GCContentByInterval -L {input.intervalList} -R {input.genome} -o {output.gcContent}
@@ -64,9 +64,9 @@ rule step3_repeat_masked_targets:
 		locusComplexity = "outputs/step3_repeat_masked_targets/DATA.locus_complexity.txt",
 		lowComplexTargets = "outputs/step3_repeat_masked_targets/low_complexity_targets.txt"
 	resources:
-		mem = 200000,
+		mem = 30000,
 		threads = 4
-	log: "logs/step3_repeat_masked_targets/pseq.repeatMaskedBases.log"
+	log: "logs/snakemake_logs/step3_repeat_masked_targets/pseq.repeatMaskedBases.log"
 	shell:
 		"""
 		cat {input.intervalList} | awk '{{print $1":"$2"-"$3}}' | grep -v '@' > {output.exome4pseq}
@@ -86,12 +86,12 @@ rule step4_combine_depth:
 		input2process = "outputs/step4_combine_depth/input2process.txt",
 		RDsamplesTable = "outputs/step4_combine_depth/DATA.RD.txt"
 	resources:
-		mem = 200000,
+		mem = 30000,
 		threads = 4
-	log: "logs/step4_combine_depth/combine_depth.log"
+	log: "logs/snakemake_logs/step4_combine_depth/combine_depth.log"
 	shell:
 		"""
-		cat {input.samplesTable} | grep -v sample | awk {'{print "outputs/step1_depth_of_coverage/"$1".sample_interval_summary"}'} > {output.input2process}
+		cat {input.samplesTable} | grep -v sample | awk '{{print "outputs/step1_depth_of_coverage/"$1".sample_interval_summary"}}' > {output.input2process}
 		/statgen-xhmm-cc14e528d909/xhmm --mergeGATKdepths -o {output.RDsamplesTable}  --GATKdepthsList {output.input2process}
 		"""
 
@@ -108,9 +108,9 @@ rule step5_filter_and_center:
 		excludedTargets = "outputs/step5_filter_and_center/DATA.filtered_centered.RD.txt.filtered_targets.txt",
 		excludedSamples = "outputs/step5_filter_and_center/DATA.filtered_centered.RD.txt.filtered_samples.txt"
 	resources:
-		mem = 200000,
+		mem = 30000,
 		threads = 4
-	log: "logs/step5_filter_and_center/filter_and_center.log"
+	log: "logs/snakemake_logs/step5_filter_and_center/filter_and_center.log"
 	shell:
 		"/statgen-xhmm-cc14e528d909/xhmm --matrix -r {input.RDsamplesTable} --centerData --centerType target -o {output.filteredCenteredData} --outputExcludedTargets {output.excludedTargets} --outputExcludedSamples {output.excludedSamples} --excludeTargets {input.extremeGCtargets} --excludeTargets {input.lowComplexTargets} --minTargetSize 10 --maxTargetSize 10000 --minMeanTargetRD 10"
 
@@ -123,9 +123,9 @@ rule step6_PCA:
 	output:
 		pca = "outputs/step6_PCA/DATA.RD_PCA"
 	resources:
-		mem = 200000,
+		mem = 30000,
 		threads = 4
-	log: "logs/step6_PCA/pca.log"
+	log: "logs/snakemake_logs/step6_PCA/pca.log"
 	shell:
 		"/statgen-xhmm-cc14e528d909/xhmm --PCA -r {input.filteredCenteredData} --PCAfiles {output.pca}"
 
@@ -135,19 +135,21 @@ rule step6_PCA:
 rule step7_normalize_and_center:
 	input:
 		filteredCenteredData = rules.step5_filter_and_center.output.filteredCenteredData,
-		pca = rules.step6_PCA.output.pca
+		pca_ld = rules.step6_PCA.output.pca+".PC_LOADINGS.txt",
+		pca_sd = rules.step6_PCA.output.pca+".PC_SD.txt",
+		pca_pc = rules.step6_PCA.output.pca+".PC.txt"
 	output:
 		normalized = "outputs/step7_normalize_and_center/DATA.PCA_normalized.txt",
 		zScore_centered = "outputs/step7_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt",
 		excludedTargets = "outputs/step7_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt.filtered_targets.txt",
 		excludedSamples = "outputs/step7_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt.filtered_samples.txt"
 	resources:
-		mem = 2000000,
+		mem = 30000,
 		threads = 4
-	log: "logs/step7_normalize/normalize.log"
+	log: "logs/snakemake_logs/step7_normalize/normalize.log"
 	shell:
 		"""
-		/statgen-xhmm-cc14e528d909/xhmm --normalize -r {input.filteredCenteredData} --PCAfiles {input.pca} --normalizeOutput {output.normalized} --PCnormalizeMethod PVE_mean --PVE_mean_factor 0.7
+		/statgen-xhmm-cc14e528d909/xhmm --normalize -r {input.filteredCenteredData} --PCAfiles outputs/step6_PCA/DATA.RD_PCA --normalizeOutput {output.normalized} --PCnormalizeMethod PVE_mean --PVE_mean_factor 0.7
 		/statgen-xhmm-cc14e528d909/xhmm --matrix -r {output.normalized} --centerData --centerType sample --zScoreData -o {output.zScore_centered} --outputExcludedTargets {output.excludedTargets} --outputExcludedSamples {output.excludedSamples} --maxSdTargetRD 50 --maxMeanSampleRD 40
 		"""
 
@@ -163,9 +165,9 @@ rule step8_same_filter:
 	output:
 		same_filtered = "outputs/step8_same_filter/DATA.same_filtered.RD.txt"
 	resources:
-		mem = 2000000,
+		mem = 30000,
 		threads = 4
-	log: "logs/step8_same_filter/same_filter.log"
+	log: "logs/snakemake_logs/step8_same_filter/same_filter.log"
 	shell:
 		"/statgen-xhmm-cc14e528d909/xhmm --matrix -r {input.RDsamplesTable} --excludeTargets {input.excludedTargets_step5} --excludeTargets {input.excludedTargets_step7}  --excludeSamples {input.excludedSamples_step5} --excludeSamples {input.excludedSamples_step7} -o {output.same_filtered}"
 
@@ -197,34 +199,10 @@ rule step10_genotype_CNVs:
 	resources:
 		mem = 200000,
 		threads = 4
-	log: "logs/step10_genotype_CNVs/genotype_CNVs.log"
+	log: "logs/snakemake_logs/step10_genotype_CNVs/genotype_CNVs.log"
 	shell:
-		"/statgen-xhmm-cc14e528d909/xhmm --genotype -p /statgen-xhmm-cc14e528d909/params.txt -r {input.zScore_centered} -R {input.DATA.same_filtered} -g {input.xcnv} -F {input.genome} -v {output}"
+		"/statgen-xhmm-cc14e528d909/xhmm --genotype -p /statgen-xhmm-cc14e528d909/params.txt -r {input.zScore_centered} -R {input.same_filtered} -g {input.xcnv} -F {input.genome} -v {output}"
 
 rule all:
   input:
-  	expand("outputs/step1_depth_of_coverage/{sample}", sample=SAMPLE),
-  	"outputs/step2_extreme_gc_content/DATA.locus_GC.txt",
-  	"outputs/step2_extreme_gc_content/extreme_gc_targets.txt",
-  	"outputs/step3_repeat_masked_targets/EXOME4pseq.interval_list",
-  	"outputs/step3_repeat_masked_targets/EXOME.targets.reg",
-  	"outputs/step3_repeat_masked_targets/EXOME.targets.LOCDB",
-  	"outputs/step3_repeat_masked_targets/EXOME.targets.LOCDB.loc-load",
-  	"outputs/step3_repeat_masked_targets/DATA.locus_complexity.txt",
-  	"outputs/step3_repeat_masked_targets/low_complexity_targets.txt",
-  	"outputs/step4_combine_depth/input2process.txt",
-  	"outputs/step4_combine_depth/DATA.RD.txt",
-  	"outputs/step5_filter_and_center/DATA.filtered.centered.RD.txt",
-  	"outputs/step5_filter_and_center/DATA.filtered_centered.RD.txt.filtered_targets.txt",
-  	"outputs/step5_filter_and_center/DATA.filtered_centered.RD.txt.filtered_samples.txt",
-  	"outputs/step6_PCA/DATA.RD_PCA",
-  	"outputs/step7_normalize_and_center/DATA.PCA_normalized.txt",
-  	"outputs/step7_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt",
-  	"outputs/step7_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt.filtered_targets.txt",
-  	"outputs/step7_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt.filtered_samples.txt",
-  	"outputs/step8_same_filter/DATA.same_filtered.RD.txt",
-  	"outputs/step9_discover_CNVs/DATA.xcnv",
-  	"outputs/step9_discover_CNVs/DATA.aux_xcnv",
-  	"outputs/step9_discover_CNVs/DATA",
   	"outputs/step10_genotype_CNVs/DATA.vcf"
-
