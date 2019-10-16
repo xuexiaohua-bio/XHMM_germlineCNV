@@ -79,13 +79,16 @@ Run the following command:
 
 #### 7. Deactivate environment and add path to .bashrc
 This step is necessary to prevent jobs from dying in case the connection with MGI breaks. 
-    `$ conda deactivate`
+    
+   `$ conda deactivate`
 
-    Add this line to .bashrc:
-    `export PATH="path/to/miniconda3/envs/xhmm_germlineCNV/bin:$PATH"` 
+   Add this line to .bashrc:
+   
+   `export PATH="path/to/miniconda3/envs/xhmm_germlineCNV/bin:$PATH"` 
 
-    Source .bashrc:
-    `$ source ~/.bashrc`
+   Source .bashrc:
+   
+   `$ source ~/.bashrc`
 
 #### 8. Go to XHMM folder in cloned git repository:
 `$ cd path/to/XHMM_germlineCNV/XHMM`
