@@ -115,94 +115,75 @@ rule step5_filter_and_center:
 		"/statgen-xhmm-cc14e528d909/xhmm --matrix -r {input.RDsamplesTable} --centerData --centerType target -o {output.filteredCenteredData} --outputExcludedTargets {output.excludedTargets} --outputExcludedSamples {output.excludedSamples} --excludeTargets {input.extremeGCtargets} --excludeTargets {input.lowComplexTargets} --minTargetSize 10 --maxTargetSize 10000 --minMeanTargetRD 10"
 
 
-### STEP 6: PCA to remove systematic bias
+### STEP 6: PCA to remove systematic bias and normalize to sample-level zscore
 
-rule step6_PCA:
+rule step6_PCA_normalize_and_center:
 	input:
 		filteredCenteredData = rules.step5_filter_and_center.output.filteredCenteredData
 	output:
-		pca = "outputs/step6_PCA/DATA.RD_PCA"
+		normalized = "outputs/step6_PCA_normalize_and_center/DATA.PCA_normalized.txt",
+                zScore_centered = "outputs/step6_PCA_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt",
+                excludedTargets = "outputs/step6_PCA_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt.filtered_targets.txt",
+                excludedSamples = "outputs/step6_PCA_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt.filtered_samples.txt"
 	resources:
 		mem = 30000,
 		threads = 4
-	log: "logs/snakemake_logs/step6_PCA/pca.log"
-	shell:
-		"/statgen-xhmm-cc14e528d909/xhmm --PCA -r {input.filteredCenteredData} --PCAfiles {output.pca}"
-
-
-### STEP 7: Normalize to sample-level zscore
-
-rule step7_normalize_and_center:
-	input:
-		filteredCenteredData = rules.step5_filter_and_center.output.filteredCenteredData,
-		pca_ld = rules.step6_PCA.output.pca+".PC_LOADINGS.txt",
-		pca_sd = rules.step6_PCA.output.pca+".PC_SD.txt",
-		pca_pc = rules.step6_PCA.output.pca+".PC.txt"
-	output:
-		normalized = "outputs/step7_normalize_and_center/DATA.PCA_normalized.txt",
-		zScore_centered = "outputs/step7_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt",
-		excludedTargets = "outputs/step7_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt.filtered_targets.txt",
-		excludedSamples = "outputs/step7_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt.filtered_samples.txt"
-	resources:
-		mem = 30000,
-		threads = 4
-	log: "logs/snakemake_logs/step7_normalize/normalize.log"
+	log: "logs/snakemake_logs/step6_PCA_normalize_and_center/pca_normalize_and_center.log"
 	shell:
 		"""
-		/statgen-xhmm-cc14e528d909/xhmm --normalize -r {input.filteredCenteredData} --PCAfiles outputs/step6_PCA/DATA.RD_PCA --normalizeOutput {output.normalized} --PCnormalizeMethod PVE_mean --PVE_mean_factor 0.7
-		/statgen-xhmm-cc14e528d909/xhmm --matrix -r {output.normalized} --centerData --centerType sample --zScoreData -o {output.zScore_centered} --outputExcludedTargets {output.excludedTargets} --outputExcludedSamples {output.excludedSamples} --maxSdTargetRD 50 --maxMeanSampleRD 40
+		/statgen-xhmm-cc14e528d909/xhmm --PCA -r {input.filteredCenteredData} --PCAfiles outputs/step6_PCA_normalize_and_center/DATA.RD_PCA
+		/statgen-xhmm-cc14e528d909/xhmm --normalize -r {input.filteredCenteredData} --PCAfiles outputs/step6_PCA_normalize_and_center/DATA.RD_PCA --normalizeOutput {output.normalized} --PCnormalizeMethod PVE_mean --PVE_mean_factor 0.7
+                /statgen-xhmm-cc14e528d909/xhmm --matrix -r {output.normalized} --centerData --centerType sample --zScoreData -o {output.zScore_centered} --outputExcludedTargets {output.excludedTargets} --outputExcludedSamples {output.excludedSamples} --maxSdTargetRD 50 --maxMeanSampleRD 40
 		"""
 
-
-### STEP 8: Filter original read-depth data to be the same as filtered, normalized data
-rule step8_same_filter:
+### STEP 7: Filter original read-depth data to be the same as filtered, normalized data
+rule step7_same_filter:
 	input:
 		RDsamplesTable = rules.step4_combine_depth.output.RDsamplesTable,
 		excludedTargets_step5 = rules.step5_filter_and_center.output.excludedTargets,
-		excludedTargets_step7 = rules.step7_normalize_and_center.output.excludedTargets,
+		excludedTargets_step6 = rules.step6_PCA_normalize_and_center.output.excludedTargets,
 		excludedSamples_step5 = rules.step5_filter_and_center.output.excludedSamples,
-		excludedSamples_step7 = rules.step7_normalize_and_center.output.excludedSamples
+		excludedSamples_step6 = rules.step6_PCA_normalize_and_center.output.excludedSamples
 	output:
-		same_filtered = "outputs/step8_same_filter/DATA.same_filtered.RD.txt"
+		same_filtered = "outputs/step7_same_filter/DATA.same_filtered.RD.txt"
 	resources:
 		mem = 30000,
 		threads = 4
-	log: "logs/snakemake_logs/step8_same_filter/same_filter.log"
+	log: "logs/snakemake_logs/step7_same_filter/same_filter.log"
 	shell:
-		"/statgen-xhmm-cc14e528d909/xhmm --matrix -r {input.RDsamplesTable} --excludeTargets {input.excludedTargets_step5} --excludeTargets {input.excludedTargets_step7}  --excludeSamples {input.excludedSamples_step5} --excludeSamples {input.excludedSamples_step7} -o {output.same_filtered}"
+		"/statgen-xhmm-cc14e528d909/xhmm --matrix -r {input.RDsamplesTable} --excludeTargets {input.excludedTargets_step5} --excludeTargets {input.excludedTargets_step6}  --excludeSamples {input.excludedSamples_step5} --excludeSamples {input.excludedSamples_step6} -o {output.same_filtered}"
 
-### STEP 9: Discover CNVs
+### STEP 8: Discover CNVs
 
-rule step9_discover_CNVs:
+rule step8_discover_CNVs:
 	input:
-		zScore_centered = rules.step7_normalize_and_center.output.zScore_centered,
-		same_filtered = rules.step8_same_filter.output.same_filtered
+		zScore_centered = rules.step6_PCA_normalize_and_center.output.zScore_centered,
+		same_filtered = rules.step7_same_filter.output.same_filtered
 	output:
-		xcnv = "outputs/step9_discover_CNVs/DATA.xcnv",
-		aux_xcnv = "outputs/step9_discover_CNVs/DATA.aux_xcnv",
-		scnv = "outputs/step9_discover_CNVs/DATA"
+		xcnv = "outputs/step8_discover_CNVs/DATA.xcnv",
+		aux_xcnv = "outputs/step8_discover_CNVs/DATA.aux_xcnv",
 	resources:
 		mem = 200000,
 		threads = 4
 	shell:
-		"/statgen-xhmm-cc14e528d909/xhmm --discover -p /statgen-xhmm-cc14e528d909/params.txt -r {input.zScore_centered} -R {input.same_filtered} -c {output.xcnv} -a {output.aux_xcnv} -s {output.scnv}"
+		"/statgen-xhmm-cc14e528d909/xhmm --discover -p /statgen-xhmm-cc14e528d909/params.txt -r {input.zScore_centered} -R {input.same_filtered} -c {output.xcnv} -a {output.aux_xcnv} -s outputs/step8_discover_CNVs/DATA"
 
-### STEP 10: Genotype CNVs:
+### STEP 9: Genotype CNVs:
 
-rule step10_genotype_CNVs:
+rule step9_genotype_CNVs:
 	input:
-		zScore_centered = rules.step7_normalize_and_center.output.zScore_centered,
-		same_filtered = rules.step8_same_filter.output.same_filtered,
-		xcnv = rules.step9_discover_CNVs.output.xcnv,
+		zScore_centered = rules.step6_PCA_normalize_and_center.output.zScore_centered,
+		same_filtered = rules.step7_same_filter.output.same_filtered,
+		xcnv = rules.step8_discover_CNVs.output.xcnv,
 		genome = config["genomeRef"]
-	output: "outputs/step10_genotype_CNVs/DATA.vcf"
+	output: "outputs/step9_genotype_CNVs/DATA.vcf"
 	resources:
 		mem = 200000,
 		threads = 4
-	log: "logs/snakemake_logs/step10_genotype_CNVs/genotype_CNVs.log"
+	log: "logs/snakemake_logs/step9_genotype_CNVs/genotype_CNVs.log"
 	shell:
 		"/statgen-xhmm-cc14e528d909/xhmm --genotype -p /statgen-xhmm-cc14e528d909/params.txt -r {input.zScore_centered} -R {input.same_filtered} -g {input.xcnv} -F {input.genome} -v {output}"
 
 rule all:
   input:
-  	"outputs/step10_genotype_CNVs/DATA.vcf"
+  	"outputs/step9_genotype_CNVs/DATA.vcf"
