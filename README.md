@@ -77,15 +77,25 @@ Run the following command:
 
 `$ gatk3-register /path/to/GenomeAnalysisTK.jar`
 
-#### 7. Go to XHMM folder in cloned git repository:
+#### 7. Deactivate environment and add path to .bashrc
+This step is necessary to prevent jobs from dying in case the connection with MGI breaks. 
+    `$ conda deactivate`
+
+    Add this line to .bashrc:
+    `export PATH="path/to/miniconda3/envs/xhmm_germlineCNV/bin:$PATH"` 
+
+    Source .bashrc:
+    `$ source ~/.bashrc`
+
+#### 8. Go to XHMM folder in cloned git repository:
 `$ cd path/to/XHMM_germlineCNV/XHMM`
 
-#### 8. Edit config.yaml file:
+#### 9. Edit config.yaml file:
 - Change the path to reference genome you are using.
 - Change the path to interval list file and seqdb file according to genome build you are using (default = grh37).
     Note that we have a copy of each of these files for both grch37 and grch38 which are downloaded when git repository is cloned (location: XHMM_germlineCNV/Files)
 
-#### 9. Modify sample.txt according to your needs:
+#### 10. Modify sample.txt according to your needs (at least 50 samples strongly recommended):
 - sample.txt must be in the format: sample\tbampath\n .
 
 Add the sample ids and path to the sample BAM files you are using.
