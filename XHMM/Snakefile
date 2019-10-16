@@ -122,9 +122,9 @@ rule step6_PCA_normalize_and_center:
 		filteredCenteredData = rules.step5_filter_and_center.output.filteredCenteredData
 	output:
 		normalized = "outputs/step6_PCA_normalize_and_center/DATA.PCA_normalized.txt",
-                zScore_centered = "outputs/step6_PCA_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt",
-                excludedTargets = "outputs/step6_PCA_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt.filtered_targets.txt",
-                excludedSamples = "outputs/step6_PCA_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt.filtered_samples.txt"
+		zScore_centered = "outputs/step6_PCA_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt",
+		excludedTargets = "outputs/step6_PCA_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt.filtered_targets.txt",
+		excludedSamples = "outputs/step6_PCA_normalize_and_center/DATA.PCA_normalized.filtered.sample_zscores.RD.txt.filtered_samples.txt"
 	resources:
 		mem = 30000,
 		threads = 4
@@ -133,7 +133,7 @@ rule step6_PCA_normalize_and_center:
 		"""
 		/statgen-xhmm-cc14e528d909/xhmm --PCA -r {input.filteredCenteredData} --PCAfiles outputs/step6_PCA_normalize_and_center/DATA.RD_PCA
 		/statgen-xhmm-cc14e528d909/xhmm --normalize -r {input.filteredCenteredData} --PCAfiles outputs/step6_PCA_normalize_and_center/DATA.RD_PCA --normalizeOutput {output.normalized} --PCnormalizeMethod PVE_mean --PVE_mean_factor 0.7
-                /statgen-xhmm-cc14e528d909/xhmm --matrix -r {output.normalized} --centerData --centerType sample --zScoreData -o {output.zScore_centered} --outputExcludedTargets {output.excludedTargets} --outputExcludedSamples {output.excludedSamples} --maxSdTargetRD 50 --maxMeanSampleRD 40
+		/statgen-xhmm-cc14e528d909/xhmm --matrix -r {output.normalized} --centerData --centerType sample --zScoreData -o {output.zScore_centered} --outputExcludedTargets {output.excludedTargets} --outputExcludedSamples {output.excludedSamples} --maxSdTargetRD 50 --maxMeanSampleRD 40
 		"""
 
 ### STEP 7: Filter original read-depth data to be the same as filtered, normalized data
