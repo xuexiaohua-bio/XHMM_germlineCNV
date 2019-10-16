@@ -1,7 +1,7 @@
 # XHMM_germlineCNV
 
 ## Description:
-A Snakemake workflow to call germline copy number variants (CNVs).
+A Snakemake workflow to call germline copy number variants (CNVs) from whole-exome sequencing data.
 This workflow uses XHMM for calling germline CNVs, based on the work published by Fromer and Purcell, 2014.
 Please cite their work if using this workflow in your projects.
 
