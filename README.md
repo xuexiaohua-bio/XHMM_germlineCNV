@@ -7,7 +7,7 @@ Please cite their work if using this workflow in your projects.
 
 As described in the XHMM manual, "XHMM was explicitly designed to be used with targeted exome sequencing at high coverage (at least 60x - 100x) using Illumina HiSeq (or similar) sequencing of at least ~50 samples."
 
-Running this pipeline on less than 50 samples can sometimes result in an empty .vcf, so running on ≥50 samples is strongly recommended. 
+Running this pipeline on less than 50 samples may result in an empty .vcf, so running on ≥50 samples is strongly recommended. 
 
 ##### The original software manual can be found here:
 https://atgu.mgh.harvard.edu/xhmm/tutorial.shtml
